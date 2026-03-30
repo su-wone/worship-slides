@@ -36,14 +36,9 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Smooth transitions */
-* {
-  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-/* Focus styles */
-input:focus, textarea:focus, button:focus-visible {
-  outline: none;
+/* Focus styles - visible for keyboard navigation (a11y) */
+:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+  border-radius: 4px;
 }

@@ -23,29 +23,6 @@ function removeSectionLabels(text: string): string {
     .join('\n');
 }
 
-// 한국어 문장 종결어미 패턴 (찬양에서 자주 사용)
-const SENTENCE_ENDINGS = [
-  // 평서형
-  /다$/,  /요$/, /네$/, /니$/, /라$/, /리$/, /세$/,
-  /하네$/, /하라$/, /하리$/, /하세$/, /하리라$/,
-  /합니다$/, /합니다$/, /습니다$/, /입니다$/,
-  /하여라$/, /하소서$/, /하리라$/, /하시네$/,
-  /주소서$/, /하옵소서$/, /하시리$/,
-  // 감탄형
-  /도다$/, /로다$/, /리로다$/, /이여$/, /이시여$/,
-  /는가$/, /런가$/, /ㄴ가$/, /할까$/,
-  // 연결형 (찬양에서 줄바꿈이 자연스러운 위치)
-  /때$/, /때에$/, /위해$/, /통해$/,
-  // 반복/후렴 표시
-  /아멘$/, /할렐루야$/, /호산나$/,
-];
-
-// 줄바꿈하면 안 되는 패턴 (조사/접속 등 다음 줄과 이어져야 하는 경우)
-const NO_BREAK_AFTER = [
-  /^그$/, /^그리고$/, /^또$/, /^또한$/,
-  /^내$/, /^나$/, /^주$/, /^그$/, /^이$/,
-];
-
 /**
  * 가사 텍스트를 자연스러운 프레이즈 단위로 정리
  */
@@ -133,43 +110,6 @@ function splitKoreanPhrase(text: string): string[] {
   }
 
   return result;
-}
-
-/**
- * 문장이 자연스러운 끊김 위치인지 확인
- */
-function hasNaturalBreak(text: string): boolean {
-  return SENTENCE_ENDINGS.some(pattern => pattern.test(text));
-}
-
-/**
- * 텍스트에서 가장 자연스러운 줄바꿈 위치 찾기
- */
-function findBestBreakPoint(text: string): number {
-  const targetLen = Math.floor(text.length / 2);
-  let bestPos = -1;
-  let bestScore = Infinity;
-
-  // 공백 위치들 중 중간 지점에 가장 가까운 곳 찾기
-  for (let i = 8; i < text.length - 5; i++) {
-    if (text[i] === ' ') {
-      const before = text.substring(0, i).trim();
-      const score = Math.abs(i - targetLen);
-
-      // 종결어미 앞이면 보너스
-      if (hasNaturalBreak(before)) {
-        if (score - 10 < bestScore) {
-          bestScore = score - 10;
-          bestPos = i;
-        }
-      } else if (score < bestScore) {
-        bestScore = score;
-        bestPos = i;
-      }
-    }
-  }
-
-  return bestPos;
 }
 
 /**

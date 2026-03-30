@@ -210,51 +210,53 @@ export default function Home() {
   const songsWithLyrics = songs.filter(s => s.lyrics.trim()).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 text-white">
-      <header className="border-b border-white/10 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-6 py-6 flex items-center gap-3">
-          <div className="p-2 bg-indigo-600 rounded-xl">
-            <Music className="w-6 h-6" />
+    <div className="min-h-screen bg-[#f5f0e8] text-[#1a1a1a]">
+      {/* Header */}
+      <header className="border-b-3 border-[#1a1a1a] bg-[#a8d8ea]">
+        <div className="max-w-4xl mx-auto px-6 py-5 flex items-center gap-4">
+          <div className="p-2.5 bg-[#ffde59] border-3 border-[#1a1a1a] neo-shadow-sm">
+            <Music className="w-7 h-7" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">WorshipSlides</h1>
-            <p className="text-sm text-gray-400">찬양 프레젠테이션 자동 생성</p>
+            <h1 className="text-3xl font-black tracking-tight uppercase">WorshipSlides</h1>
+            <p className="text-sm font-bold text-[#1a1a1a]/70">찬양 프레젠테이션 자동 생성</p>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-6 py-10 space-y-6">
+      <main className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+        {/* Error */}
         {error && (
-          <div role="alert" className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 text-sm flex items-center justify-between">
+          <div role="alert" className="bg-[#ff6b6b] border-3 border-[#1a1a1a] neo-shadow px-4 py-3 text-[#1a1a1a] text-sm font-bold flex items-center justify-between">
             <span>{error}</span>
-            <button onClick={() => setError('')} aria-label="에러 닫기" className="p-1 hover:bg-red-500/20 rounded-lg transition">
+            <button onClick={() => setError('')} aria-label="에러 닫기" className="p-1 hover:bg-[#1a1a1a]/10">
               <X className="w-4 h-4" />
             </button>
           </div>
         )}
 
         {/* Songs List */}
-        <div className="space-y-4">
+        <div className="space-y-5">
           {songs.map((song, index) => (
-            <section key={song.id} aria-label={song.videoInfo?.title || `곡 ${index + 1}`} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-              <div className="flex items-center justify-between px-6 py-4">
+            <section key={song.id} aria-label={song.videoInfo?.title || `곡 ${index + 1}`} className="bg-white border-3 border-[#1a1a1a] neo-shadow overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-3 bg-[#c3f0ca] border-b-3 border-[#1a1a1a]">
                 <button
                   type="button"
                   aria-expanded={!song.collapsed}
                   aria-controls={`song-panel-${song.id}`}
-                  className="flex-1 flex items-center gap-3 text-left hover:bg-white/5 -ml-2 pl-2 py-1 rounded-lg transition"
+                  className="flex-1 flex items-center gap-3 text-left py-1"
                   onClick={() => updateSong(song.id, { collapsed: !song.collapsed })}
                 >
-                  <span className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-sm font-bold shrink-0">
+                  <span className="w-9 h-9 bg-[#ffde59] border-2 border-[#1a1a1a] flex items-center justify-center text-sm font-black shrink-0">
                     {index + 1}
                   </span>
-                  <span className="font-semibold truncate">
+                  <span className="font-bold truncate">
                     {song.videoInfo?.title || `곡 ${index + 1}`}
                   </span>
                   {song.lyrics && (
-                    <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full shrink-0">가사 준비됨</span>
+                    <span className="text-xs bg-[#a8d8ea] border-2 border-[#1a1a1a] px-2 py-0.5 font-bold shrink-0">OK</span>
                   )}
-                  {song.collapsed ? <ChevronDown className="w-4 h-4 text-gray-400 shrink-0 ml-auto" /> : <ChevronUp className="w-4 h-4 text-gray-400 shrink-0 ml-auto" />}
+                  {song.collapsed ? <ChevronDown className="w-5 h-5 shrink-0 ml-auto" /> : <ChevronUp className="w-5 h-5 shrink-0 ml-auto" />}
                 </button>
                 <div className="flex items-center gap-2 ml-2">
                   {songs.length > 1 && (
@@ -262,7 +264,7 @@ export default function Home() {
                       type="button"
                       aria-label={`${song.videoInfo?.title || `곡 ${index + 1}`} 삭제`}
                       onClick={() => removeSong(song.id)}
-                      className="p-2 hover:bg-red-500/20 rounded-lg transition text-gray-400 hover:text-red-400"
+                      className="p-2 bg-[#ff6b6b] border-2 border-[#1a1a1a] neo-btn text-[#1a1a1a] hover:bg-[#ff4444]"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -271,40 +273,43 @@ export default function Home() {
               </div>
 
               {!song.collapsed && (
-                <div id={`song-panel-${song.id}`} className="px-6 pb-6 space-y-4 border-t border-white/5 pt-4">
+                <div id={`song-panel-${song.id}`} className="px-5 pb-5 space-y-4 pt-4">
+                  {/* URL Input */}
                   <div className="flex gap-3">
                     <input
                       type="text"
                       value={song.url}
                       onChange={(e) => updateSong(song.id, { url: e.target.value })}
                       placeholder="YouTube URL을 입력하세요..."
-                      className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition text-sm"
+                      className="flex-1 bg-white border-3 border-[#1a1a1a] px-4 py-3 text-[#1a1a1a] placeholder-[#999] focus:outline-none focus:ring-0 text-sm font-medium neo-shadow-sm"
                       onKeyDown={(e) => e.key === 'Enter' && fetchVideoInfo(song)}
                     />
                     <button
                       onClick={() => fetchVideoInfo(song)}
                       disabled={song.loadingVideo || !song.url.trim()}
-                      className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-3 rounded-xl font-medium transition flex items-center gap-2 whitespace-nowrap text-sm"
+                      className="bg-[#a8d8ea] border-3 border-[#1a1a1a] neo-btn disabled:opacity-50 disabled:cursor-not-allowed px-5 py-3 font-bold flex items-center gap-2 whitespace-nowrap text-sm"
                     >
                       {song.loadingVideo ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
                       가져오기
                     </button>
                   </div>
 
+                  {/* Video Info */}
                   {song.videoInfo && (
-                    <div className="flex gap-4 bg-white/5 rounded-xl p-3 items-center">
-                      <Image src={song.videoInfo.thumbnail} alt={`${song.videoInfo.title} 썸네일`} width={128} height={80} className="w-32 h-20 object-cover rounded-lg" />
+                    <div className="flex gap-4 bg-[#fff3cd] border-3 border-[#1a1a1a] p-3 items-center neo-shadow-sm">
+                      <Image src={song.videoInfo.thumbnail} alt={`${song.videoInfo.title} 썸네일`} width={128} height={80} className="w-32 h-20 object-cover border-2 border-[#1a1a1a]" />
                       <div>
-                        <h3 className="font-semibold text-sm">{song.videoInfo.title}</h3>
-                        <p className="text-xs text-gray-400 mt-1">{song.videoInfo.channelTitle}</p>
+                        <h3 className="font-bold text-sm">{song.videoInfo.title}</h3>
+                        <p className="text-xs font-medium text-[#1a1a1a]/60 mt-1">{song.videoInfo.channelTitle}</p>
                       </div>
                     </div>
                   )}
 
+                  {/* Lyrics */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-blue-400" />
+                      <span className="text-sm font-bold flex items-center gap-2">
+                        <FileText className="w-4 h-4" />
                         가사
                       </span>
                       {song.videoInfo && (
@@ -312,7 +317,7 @@ export default function Home() {
                           <button
                             onClick={() => fetchLyrics(song.id, song.videoInfo!.id, song.videoInfo!.title)}
                             disabled={song.loadingLyrics}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 rounded-lg text-xs font-medium transition"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#d4a5ff] border-2 border-[#1a1a1a] neo-btn disabled:opacity-50 text-xs font-bold"
                           >
                             {song.loadingLyrics ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
                             AI 추출
@@ -320,7 +325,7 @@ export default function Home() {
                           <button
                             onClick={() => searchByTitle(song)}
                             disabled={song.loadingLyrics}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-lg text-xs font-medium transition"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#a8d8ea] border-2 border-[#1a1a1a] neo-btn disabled:opacity-50 text-xs font-bold"
                           >
                             {song.loadingLyrics ? <Loader2 className="w-3 h-3 animate-spin" /> : <Music className="w-3 h-3" />}
                             제목 검색
@@ -329,14 +334,14 @@ export default function Home() {
                       )}
                     </div>
                     {song.lyricsSource && (
-                      <p className="text-xs text-indigo-400 bg-indigo-500/10 rounded-lg px-3 py-1.5">{song.lyricsSource}</p>
+                      <p className="text-xs font-bold bg-[#e8d5f5] border-2 border-[#1a1a1a] px-3 py-1.5">{song.lyricsSource}</p>
                     )}
                     <textarea
                       value={song.lyrics}
                       onChange={(e) => updateSong(song.id, { lyrics: e.target.value })}
                       placeholder="가사를 입력하세요..."
                       rows={6}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition resize-none text-sm"
+                      className="w-full bg-white border-3 border-[#1a1a1a] px-4 py-3 text-[#1a1a1a] placeholder-[#999] focus:outline-none focus:ring-0 resize-none text-sm font-medium neo-shadow-sm"
                     />
                     {song.lyrics.trim() && (
                       <button
@@ -345,7 +350,7 @@ export default function Home() {
                           saveLyricsToStorage(songTitle, song.lyrics);
                           updateSong(song.id, { lyricsSource: `"${songTitle}" 가사가 브라우저에 저장되었습니다.` });
                         }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-500 rounded-lg text-xs font-medium transition self-end"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#c3f0ca] border-2 border-[#1a1a1a] neo-btn text-xs font-bold"
                       >
                         <Save className="w-3 h-3" />
                         가사 저장 (브라우저)
@@ -361,33 +366,34 @@ export default function Home() {
         {/* Add Song */}
         <button
           onClick={addSong}
-          className="w-full border-2 border-dashed border-white/10 hover:border-indigo-500/50 rounded-2xl py-4 flex items-center justify-center gap-2 text-gray-400 hover:text-indigo-400 transition"
+          className="w-full border-3 border-dashed border-[#1a1a1a] bg-white hover:bg-[#ffde59] py-4 flex items-center justify-center gap-2 font-bold transition-colors"
         >
           <Plus className="w-5 h-5" />
           곡 추가
         </button>
 
         {/* Settings */}
-        <section className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Palette className="w-5 h-5 text-purple-400" />
+        <section className="bg-white border-3 border-[#1a1a1a] neo-shadow p-6 space-y-6">
+          <h2 className="text-lg font-black flex items-center gap-2 uppercase">
+            <Palette className="w-5 h-5" />
             PPT 설정
           </h2>
 
+          {/* Theme */}
           <div className="space-y-3">
-            <span className="text-sm font-medium text-gray-300">테마</span>
+            <span className="text-sm font-bold">테마</span>
             <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
               {THEMES.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => setTheme(t.id)}
-                  className={`relative rounded-xl p-3 text-center transition-all ${
-                    theme === t.id ? 'ring-2 ring-indigo-400 scale-105' : 'hover:scale-105 opacity-70 hover:opacity-100'
+                  className={`relative border-2 border-[#1a1a1a] p-2.5 text-center transition-all ${
+                    theme === t.id ? 'neo-shadow-sm scale-105 ring-2 ring-[#ffde59]' : 'hover:neo-shadow-sm opacity-80 hover:opacity-100'
                   }`}
                   style={{ backgroundColor: t.color }}
                 >
-                  <div className="w-6 h-1 rounded mx-auto mb-2" style={{ backgroundColor: t.accent }} />
-                  <span className={`text-xs font-medium ${t.textDark ? 'text-gray-800' : 'text-white'}`}>{t.name}</span>
+                  <div className="w-6 h-1.5 mx-auto mb-1.5" style={{ backgroundColor: t.accent }} />
+                  <span className={`text-xs font-bold ${t.textDark ? 'text-[#1a1a1a]' : 'text-white'}`}>{t.name}</span>
                 </button>
               ))}
             </div>
@@ -395,7 +401,7 @@ export default function Home() {
 
           {/* Decoration */}
           <div className="space-y-3">
-            <span className="text-sm font-medium text-gray-300">장식 스타일</span>
+            <span className="text-sm font-bold">장식 스타일</span>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
               {[
                 { id: 'none', name: '없음', emoji: '—' },
@@ -411,26 +417,27 @@ export default function Home() {
                 <button
                   key={d.id}
                   onClick={() => setDeco(d.id)}
-                  className={`rounded-xl px-3 py-2 text-center transition-all ${
-                    deco === d.id ? 'ring-2 ring-indigo-400 bg-white/10' : 'bg-white/5 opacity-70 hover:opacity-100 hover:bg-white/10'
+                  className={`border-2 border-[#1a1a1a] px-3 py-2 text-center transition-all ${
+                    deco === d.id ? 'bg-[#ffde59] neo-shadow-sm' : 'bg-white hover:bg-[#f5f0e8]'
                   }`}
                 >
                   <span className="text-lg">{d.emoji}</span>
-                  <p className="text-xs text-gray-400 mt-1">{d.name}</p>
+                  <p className="text-xs font-bold mt-1">{d.name}</p>
                 </button>
               ))}
             </div>
           </div>
 
+          {/* Lines per slide */}
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-300">슬라이드당 줄 수</span>
-            <div className="flex gap-2">
+            <span className="text-sm font-bold">슬라이드당 줄 수</span>
+            <div className="flex gap-2" role="group" aria-label="슬라이드당 줄 수 선택">
               {[2, 3, 4, 5, 6].map((n) => (
                 <button
                   key={n}
                   onClick={() => setLinesPerSlide(n)}
-                  className={`w-10 h-10 rounded-lg font-medium transition ${
-                    linesPerSlide === n ? 'bg-indigo-600 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                  className={`w-10 h-10 border-2 border-[#1a1a1a] font-black transition-all ${
+                    linesPerSlide === n ? 'bg-[#ffde59] neo-shadow-sm' : 'bg-white hover:bg-[#f5f0e8]'
                   }`}
                 >
                   {n}
@@ -439,30 +446,31 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Font */}
           <div className="space-y-3">
-            <span className="text-sm font-medium text-gray-300">글꼴</span>
+            <span className="text-sm font-bold">글꼴</span>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {FONTS.map((f) => (
                 <button
                   key={f.id}
                   onClick={() => setFont(f.id)}
-                  className={`rounded-xl px-4 py-3 text-center transition-all ${
-                    font === f.id ? 'ring-2 ring-indigo-400 bg-white/10' : 'bg-white/5 opacity-70 hover:opacity-100 hover:bg-white/10'
+                  className={`border-2 border-[#1a1a1a] px-4 py-3 text-center transition-all ${
+                    font === f.id ? 'bg-[#a8d8ea] neo-shadow-sm' : 'bg-white hover:bg-[#f5f0e8]'
                   }`}
                 >
-                  <span className="text-sm font-medium" style={{ fontFamily: f.fontFace }}>{f.name}</span>
-                  <p className="text-xs text-gray-500 mt-1" style={{ fontFamily: f.fontFace }}>하나님의 은혜</p>
+                  <span className="text-sm font-bold" style={{ fontFamily: f.fontFace }}>{f.name}</span>
+                  <p className="text-xs text-[#1a1a1a]/50 mt-1 font-medium" style={{ fontFamily: f.fontFace }}>하나님의 은혜</p>
                 </button>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Generate */}
+        {/* Generate Button */}
         <button
           onClick={generatePpt}
           disabled={loadingPpt || songsWithLyrics === 0}
-          className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed py-4 rounded-2xl font-bold text-lg transition flex items-center justify-center gap-3"
+          className="w-full bg-[#ffde59] border-3 border-[#1a1a1a] neo-shadow-lg disabled:opacity-50 disabled:cursor-not-allowed py-5 font-black text-lg uppercase flex items-center justify-center gap-3"
         >
           {loadingPpt ? (
             <><Loader2 className="w-5 h-5 animate-spin" />PPT 생성 중...</>
@@ -471,8 +479,8 @@ export default function Home() {
           )}
         </button>
 
-        <footer className="text-center text-xs text-gray-600 pt-8 pb-4">
-          WorshipSlides — 교회 찬양을 위한 프레젠테이션 생성기
+        <footer className="text-center text-xs font-bold text-[#1a1a1a]/40 pt-8 pb-4">
+          WorshipSlides — 찬양을 위한 프레젠테이션 생성기
         </footer>
       </main>
     </div>

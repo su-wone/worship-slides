@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Music, Download, PlayCircle, Loader2, FileText, Palette, Sparkles, Plus, Trash2, ChevronDown, ChevronUp, Save } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import Image from 'next/image';
+import { Music, Download, PlayCircle, Loader2, FileText, Palette, Sparkles, Plus, Trash2, ChevronDown, ChevronUp, Save, X } from 'lucide-react';
 
 interface VideoInfo {
   id: string;
@@ -11,7 +12,7 @@ interface VideoInfo {
 }
 
 interface SongItem {
-  id: number;
+  id: string;
   url: string;
   videoInfo: VideoInfo | null;
   lyrics: string;
@@ -59,9 +60,27 @@ const FONTS = [
   { id: 'arial', name: 'Arial', fontFace: 'Arial' },
 ];
 
-let nextId = 1;
 function createSong(): SongItem {
-  return { id: nextId++, url: '', videoInfo: null, lyrics: '', lyricsSource: '', loadingVideo: false, loadingLyrics: false, collapsed: false };
+  return { id: crypto.randomUUID(), url: '', videoInfo: null, lyrics: '', lyricsSource: '', loadingVideo: false, loadingLyrics: false, collapsed: false };
+}
+
+// localStorage helpers for saved lyrics
+function loadSavedLyrics(): Array<{ title: string; lyrics: string }> {
+  if (typeof window === 'undefined') return [];
+  try {
+    return JSON.parse(localStorage.getItem('worship-slides-lyrics') || '[]');
+  } catch { return []; }
+}
+
+function saveLyricsToStorage(title: string, lyrics: string) {
+  const db = loadSavedLyrics();
+  const existing = db.findIndex(s => s.title === title);
+  if (existing >= 0) {
+    db[existing].lyrics = lyrics;
+  } else {
+    db.push({ title, lyrics });
+  }
+  localStorage.setItem('worship-slides-lyrics', JSON.stringify(db));
 }
 
 export default function Home() {
@@ -73,13 +92,13 @@ export default function Home() {
   const [loadingPpt, setLoadingPpt] = useState(false);
   const [error, setError] = useState('');
 
-  const updateSong = (id: number, updates: Partial<SongItem>) => {
+  const updateSong = useCallback((id: string, updates: Partial<SongItem>) => {
     setSongs(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
-  };
+  }, []);
 
   const addSong = () => setSongs(prev => [...prev, createSong()]);
 
-  const removeSong = (id: number) => {
+  const removeSong = (id: string) => {
     if (songs.length <= 1) return;
     setSongs(prev => prev.filter(s => s.id !== id));
   };
@@ -103,7 +122,7 @@ export default function Home() {
     }
   };
 
-  const fetchLyrics = async (songId: number, videoId: string, videoTitle?: string) => {
+  const fetchLyrics = async (songId: string, videoId: string, videoTitle?: string) => {
     updateSong(songId, { loadingLyrics: true });
     try {
       const res = await fetch('/api/transcribe', {
@@ -164,7 +183,9 @@ export default function Home() {
       });
       if (!res.ok) {
         const text = await res.text();
-        try { throw new Error(JSON.parse(text).error); } catch { throw new Error('PPT 생성 중 오류가 발생했습니다.'); }
+        let errorMsg = 'PPT 생성 중 오류가 발생했습니다.';
+        try { errorMsg = JSON.parse(text).error || errorMsg; } catch { /* use default */ }
+        throw new Error(errorMsg);
       }
       const arrayBuffer = await res.arrayBuffer();
       const blob = new Blob([arrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
@@ -204,45 +225,53 @@ export default function Home() {
 
       <main className="max-w-4xl mx-auto px-6 py-10 space-y-6">
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 text-sm">
-            {error}
+          <div role="alert" className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 text-sm flex items-center justify-between">
+            <span>{error}</span>
+            <button onClick={() => setError('')} aria-label="에러 닫기" className="p-1 hover:bg-red-500/20 rounded-lg transition">
+              <X className="w-4 h-4" />
+            </button>
           </div>
         )}
 
         {/* Songs List */}
         <div className="space-y-4">
           {songs.map((song, index) => (
-            <section key={song.id} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-              <div
-                className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-white/5 transition"
-                onClick={() => updateSong(song.id, { collapsed: !song.collapsed })}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-sm font-bold">
+            <section key={song.id} aria-label={song.videoInfo?.title || `곡 ${index + 1}`} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4">
+                <button
+                  type="button"
+                  aria-expanded={!song.collapsed}
+                  aria-controls={`song-panel-${song.id}`}
+                  className="flex-1 flex items-center gap-3 text-left hover:bg-white/5 -ml-2 pl-2 py-1 rounded-lg transition"
+                  onClick={() => updateSong(song.id, { collapsed: !song.collapsed })}
+                >
+                  <span className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-sm font-bold shrink-0">
                     {index + 1}
                   </span>
-                  <span className="font-semibold">
+                  <span className="font-semibold truncate">
                     {song.videoInfo?.title || `곡 ${index + 1}`}
                   </span>
                   {song.lyrics && (
-                    <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">가사 준비됨</span>
+                    <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full shrink-0">가사 준비됨</span>
                   )}
-                </div>
-                <div className="flex items-center gap-2">
+                  {song.collapsed ? <ChevronDown className="w-4 h-4 text-gray-400 shrink-0 ml-auto" /> : <ChevronUp className="w-4 h-4 text-gray-400 shrink-0 ml-auto" />}
+                </button>
+                <div className="flex items-center gap-2 ml-2">
                   {songs.length > 1 && (
                     <button
-                      onClick={(e) => { e.stopPropagation(); removeSong(song.id); }}
+                      type="button"
+                      aria-label={`${song.videoInfo?.title || `곡 ${index + 1}`} 삭제`}
+                      onClick={() => removeSong(song.id)}
                       className="p-2 hover:bg-red-500/20 rounded-lg transition text-gray-400 hover:text-red-400"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   )}
-                  {song.collapsed ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronUp className="w-4 h-4 text-gray-400" />}
                 </div>
               </div>
 
               {!song.collapsed && (
-                <div className="px-6 pb-6 space-y-4 border-t border-white/5 pt-4">
+                <div id={`song-panel-${song.id}`} className="px-6 pb-6 space-y-4 border-t border-white/5 pt-4">
                   <div className="flex gap-3">
                     <input
                       type="text"
@@ -264,7 +293,7 @@ export default function Home() {
 
                   {song.videoInfo && (
                     <div className="flex gap-4 bg-white/5 rounded-xl p-3 items-center">
-                      <img src={song.videoInfo.thumbnail} alt={song.videoInfo.title} className="w-32 h-20 object-cover rounded-lg" />
+                      <Image src={song.videoInfo.thumbnail} alt={`${song.videoInfo.title} 썸네일`} width={128} height={80} className="w-32 h-20 object-cover rounded-lg" />
                       <div>
                         <h3 className="font-semibold text-sm">{song.videoInfo.title}</h3>
                         <p className="text-xs text-gray-400 mt-1">{song.videoInfo.channelTitle}</p>
@@ -311,24 +340,15 @@ export default function Home() {
                     />
                     {song.lyrics.trim() && (
                       <button
-                        onClick={async () => {
+                        onClick={() => {
                           const songTitle = song.videoInfo?.title || `곡 ${index + 1}`;
-                          try {
-                            const res = await fetch('/api/lyrics', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ title: songTitle, lyrics: song.lyrics }),
-                            });
-                            const data = await res.json();
-                            updateSong(song.id, { lyricsSource: data.message || '저장 완료!' });
-                          } catch {
-                            updateSong(song.id, { lyricsSource: '저장 중 오류가 발생했습니다.' });
-                          }
+                          saveLyricsToStorage(songTitle, song.lyrics);
+                          updateSong(song.id, { lyricsSource: `"${songTitle}" 가사가 브라우저에 저장되었습니다.` });
                         }}
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-500 rounded-lg text-xs font-medium transition self-end"
                       >
                         <Save className="w-3 h-3" />
-                        가사 저장 (다음에 자동 검색됨)
+                        가사 저장 (브라우저)
                       </button>
                     )}
                   </div>
@@ -362,7 +382,7 @@ export default function Home() {
                   key={t.id}
                   onClick={() => setTheme(t.id)}
                   className={`relative rounded-xl p-3 text-center transition-all ${
-                    theme === t.id ? 'ring-2 ring-indigo-400 scale-105' : 'hover:scale-102 opacity-70 hover:opacity-100'
+                    theme === t.id ? 'ring-2 ring-indigo-400 scale-105' : 'hover:scale-105 opacity-70 hover:opacity-100'
                   }`}
                   style={{ backgroundColor: t.color }}
                 >

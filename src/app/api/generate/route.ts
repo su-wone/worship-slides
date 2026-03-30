@@ -174,12 +174,8 @@ export async function POST(request: NextRequest) {
       fill: { color: themeConfig.accent },
     });
 
-    const base64 = await pptx.write({ outputType: 'base64' }) as string;
-    const binaryString = atob(base64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
+    const buffer = await pptx.write({ outputType: 'nodebuffer' }) as Buffer;
+    const bytes = new Uint8Array(buffer);
 
     const mainTitle = validSongs.length === 1 ? validSongs[0].title : '예배찬양';
     return new Response(bytes, {

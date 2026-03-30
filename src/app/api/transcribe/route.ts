@@ -2,22 +2,7 @@ import { NextRequest } from 'next/server';
 import { YoutubeTranscript } from 'youtube-transcript';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as cheerio from 'cheerio';
-import { readFile } from 'fs/promises';
-import path from 'path';
 import { fuzzySearchLyrics } from '@/lib/lyrics-db';
-
-// 커스텀 DB 검색
-async function searchCustomDB(query: string): Promise<{ title: string; lyrics: string } | null> {
-  try {
-    const data = await readFile(path.join(process.cwd(), 'data', 'custom-lyrics.json'), 'utf-8');
-    const db: Array<{ title: string; lyrics: string }> = JSON.parse(data);
-    const q = query.toLowerCase();
-    const match = db.find(s => s.title.toLowerCase().includes(q) || q.includes(s.title.toLowerCase()));
-    return match || null;
-  } catch {
-    return null;
-  }
-}
 
 const genAI = process.env.GEMINI_API_KEY
   ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
@@ -33,16 +18,6 @@ export async function POST(request: NextRequest) {
 
     // Mode: 'search' - Search for lyrics by title
     if (mode === 'search' && title) {
-      // 0. First try custom (saved) DB
-      const customMatch = await searchCustomDB(title);
-      if (customMatch) {
-        return Response.json({
-          lyrics: customMatch.lyrics,
-          source: 'custom_db',
-          message: `저장된 가사에서 "${customMatch.title}"을(를) 찾았습니다.`,
-        });
-      }
-
       // 1. Try built-in DB
       const dbResults = fuzzySearchLyrics(title);
       if (dbResults.length > 0) {
@@ -76,18 +51,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Mode: 'auto' - Try custom DB, built-in DB, web search, then YouTube captions
+    // Mode: 'auto' - Try built-in DB, web search, then YouTube captions
     if (title) {
-      // 0. Custom (saved) DB
-      const customMatch = await searchCustomDB(title);
-      if (customMatch) {
-        return Response.json({
-          lyrics: customMatch.lyrics,
-          source: 'custom_db',
-          message: `저장된 가사에서 "${customMatch.title}"을(를) 찾았습니다.`,
-        });
-      }
-
       // 1. Built-in DB
       const dbResults = fuzzySearchLyrics(title);
       if (dbResults.length > 0) {
